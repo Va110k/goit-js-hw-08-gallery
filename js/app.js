@@ -208,3 +208,19 @@ const buttonModalClose = document.querySelector(
 );
 //console.log(buttonModalClose);
 buttonModalClose.addEventListener("click", onCloseModal);
+
+// * Закрытие модального окна по клику на div.lightbox__overlay.
+const overlayElement = document.querySelector(".lightbox__overlay");
+//console.log(overlayElement);
+overlayElement.addEventListener("click", onCloseModal);
+
+// * Закрытие модального окна по нажатию клавиши ESC
+function onEscKeyPress(event) {
+  const ESC_KEY_CODE = "Escape";
+  //console.log(event.code);
+  const isEscKey = event.code === ESC_KEY_CODE;
+
+  if (isEscKey) {
+    onCloseModal();
+  }
+}
