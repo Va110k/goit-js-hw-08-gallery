@@ -63,3 +63,148 @@ const galleryItems = [
     description: "Lighthouse Coast Sea",
   },
 ];
+
+const gallerryContainer = document.querySelector(".js-gallery");
+//console.log(gallerryContainer);
+
+gallerryContainer.insertAdjacentHTML(
+  "afterbegin",
+  createGalleryCardMarkup(galleryItems)
+);
+
+gallerryContainer.addEventListener("click", onGalleryLightboxClick);
+
+function createGalleryCardMarkup(galleryItems) {
+  return galleryItems
+    .map(({ preview, original, description }) => {
+      return `<li class="gallery__item">
+  <a
+    class="gallery__link"
+    href="${original}"
+  >
+    <img
+      class="gallery__image"
+      src="${preview}"
+      data-source="${original}"
+      alt="${description}"
+    />
+  </a>
+</li>`;
+    })
+    .join("");
+}
+
+const imageInModalWindow = document.querySelector(".lightbox__image");
+let imageElement;
+function onGalleryLightboxClick(event) {
+  const isLinkElement = event.target.classList.contains("gallery__image");
+  if (!isLinkElement) {
+    return;
+  }
+
+  //запретить браузеру переходить по ссылке картинки
+  event.preventDefault();
+
+  //получение url большого изображения
+  imageElement = event.target;
+  //console.log(imageElement);
+  const originalImage = imageElement.getAttribute("data-source");
+
+  //Подмена значения атрибута src элемента img.lightbox__image.
+  imageInModalWindow.setAttribute("src", originalImage);
+
+  //открытие модального окна
+  onModalOpen();
+
+  // Пролистывание изображений галереи в открытом модальном окне клавишами "влево" и "вправо"
+  //onArrowRightKeyPress();
+  //onArrowLeftKeyPress();
+}
+
+// Пролистывание изображений галереи в открытом модальном окне клавишами "влево" и "вправо"
+//   // вправо
+window.addEventListener("keydown", onArrowRightKeyPress);
+
+function onArrowRightKeyPress(event) {
+  const ARROWRIGHT_KEY_CODE = "ArrowRight";
+  //console.log(event.code);
+  const isArrowRightKey = event.code === ARROWRIGHT_KEY_CODE;
+  //console.log(imageInModalWindow);
+  if (isArrowRightKey) {
+    const imageElementNextSiblingLast =
+      imageElement.parentNode.parentNode.nextElementSibling;
+    if (imageElementNextSiblingLast === null) {
+      onCloseModal();
+    } else {
+      //console.log(imageElement);
+      let imageElementNextSibling =
+        imageElement.parentNode.parentNode.nextElementSibling.firstElementChild
+          .firstElementChild;
+      //console.log(imageElementNextSibling);
+      const originalImageElementNextSibling =
+        imageElementNextSibling.getAttribute("data-source");
+      //console.log(originalImageElementNextSibling);
+      imageInModalWindow.setAttribute(
+        "src",
+        `${originalImageElementNextSibling}`
+      );
+      //console.log(imageInModalWindow);
+      imageElement = imageElementNextSibling;
+    }
+  }
+}
+
+// //влево
+window.addEventListener("keydown", onArrowLeftKeyPress);
+
+function onArrowLeftKeyPress(event) {
+  const ARROWLEFT_KEY_CODE = "ArrowLeft";
+  //console.log(event.code);
+  const isArrowLeftKey = event.code === ARROWLEFT_KEY_CODE;
+  //console.log(imageInModalWindow);
+
+  if (isArrowLeftKey) {
+    const imageElementPreviousSiblingLast =
+      imageElement.parentNode.parentNode.previousElementSibling;
+    if (imageElementPreviousSiblingLast === null) {
+      onCloseModal();
+    } else {
+      const imageElementPreviousSibling =
+        imageElement.parentNode.parentNode.previousElementSibling
+          .firstElementChild.firstElementChild;
+      //console.log(imageElementPreviousSibling);
+      const originalImageElementPreviousSibling =
+        imageElementPreviousSibling.getAttribute("data-source");
+      //console.log(originalImageElementPreviousSibling);
+      imageInModalWindow.setAttribute(
+        "src",
+        `${originalImageElementPreviousSibling}`
+      );
+      //console.log(imageInModalWindow);
+      imageElement = imageElementPreviousSibling;
+    }
+  }
+}
+
+// Открытие модального окна
+const modalContainer = document.querySelector(".js-lightbox");
+function onModalOpen() {
+  window.addEventListener("keydown", onEscKeyPress);
+  modalContainer.classList.add("is-open");
+  //console.log(modalContainer);
+}
+
+// Закрытие модального окна - реализация
+function onCloseModal(event) {
+  modalContainer.classList.remove("is-open");
+
+  // Очистка значения атрибута src элемента img.lightbox__image. Это необходимо для того, чтобы при следующем открытии модального окна, пока грузится изображение, мы не видели предыдущее.
+  imageInModalWindow.setAttribute("src", "");
+}
+
+// * Закрытие модального окна по клику на кнопку button[data-action="close-lightbox"]
+const buttonModalClose = document.querySelector(
+  'button[data-action="close-lightbox"]'
+);
+//console.log(buttonModalClose);
+buttonModalClose.addEventListener("click", onCloseModal);
